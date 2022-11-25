@@ -4,9 +4,12 @@ package org.firstinspires.ftc.teamcode.drive;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.acmerobotics.dashboard.config.Config;
 
+@Config
 @TeleOp(name="MecanumDrive", group="TeleOp")
 public class MecanumDrive extends OpMode
 {
@@ -15,6 +18,11 @@ public class MecanumDrive extends OpMode
     private DcMotorEx RF = null;
     private DcMotorEx RB = null;
     private DcMotorEx LB = null;
+
+    public static double armDownSpeed = 0.1;
+    public static double armUpSpeed = -0.15;
+
+    public static int targetPosition = 0;
 
     // Motors at the beginning of the arm
     private DcMotorEx belt = null; // Belt motor
@@ -50,6 +58,9 @@ public class MecanumDrive extends OpMode
 
         belt.setDirection(DcMotorEx.Direction.REVERSE);
 
+        belt.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        belt2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
 
     }
 
@@ -72,7 +83,7 @@ public class MecanumDrive extends OpMode
         LB.setPower(0);
         LF.setPower(0);
 
-        claw.setPosition(0.22);
+        //claw.setPosition(0.22);
         //wrist.setPosition(0.5);
     }
 
@@ -100,15 +111,37 @@ public class MecanumDrive extends OpMode
         RB.setPower(backRightPower * powerOffset);
 
         if (gamepad2.dpad_right && !gamepad2.dpad_left) {
-            belt.setPower(-0.001); // Reverse because direction flipped
-            belt2.setPower(-0.001);
+            targetPosition = targetPosition - 5;
 
-            telemetry.addData("Belt moving down: ", belt.getCurrentPosition());
+            belt.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            belt2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+            belt.setTargetPosition(targetPosition);
+            belt2.setTargetPosition(targetPosition);
+
+            belt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            belt2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+            belt.setVelocity(armUpSpeed);
+            belt2.setVelocity(armUpSpeed);
+
+            telemetry.addData("Belt moving up: ", belt.getCurrentPosition());
         }      // Turn belt forward when A is pressed
 
         else if (gamepad2.dpad_left && !gamepad2.dpad_right) {
-            belt.setPower(0.001);
-            belt2.setPower(0.001);
+            targetPosition = targetPosition + 5;
+
+            belt.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            belt2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+            belt.setTargetPosition(targetPosition);
+            belt2.setTargetPosition(targetPosition);
+
+            belt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            belt2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+            belt.setVelocity(armDownSpeed);
+            belt2.setVelocity(armDownSpeed);
 
             telemetry.addData("Belt moving down: ", belt.getCurrentPosition());
         }
@@ -131,8 +164,8 @@ public class MecanumDrive extends OpMode
         /*telemetry.addData("Claw offset: ",  "Offset = %.2f", clawOffset);
         telemetry.addData("Claw pos: ", claw.getPosition());
         telemetry.addData("Claw port: ", claw.getPortNumber());*/
-        telemetry.addData("Wrist pos: ", wrist.getPosition());
-        telemetry.addData("Wrist port: ", wrist.getPortNumber());
+
+        telemetry.addData("Target: ", targetPosition);
         telemetry.update();
     }
 

@@ -1,69 +1,50 @@
-/* Copyright (c) 2017 FIRST. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided that
- * the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this list
- * of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this
- * list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution.
- *
- * Neither the name of FIRST nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
- * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package org.firstinspires.ftc.teamcode.drive.blue;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
-@Autonomous(name="BlueRight",group="Blue")
 public class blueRight extends LinearOpMode {
+        @Override
+        public void runOpMode() {
+            SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-    private DcMotorEx LF = null;
-    private DcMotorEx RF = null;
-    private DcMotorEx RB = null;
-    private DcMotorEx LB = null;
+            Pose2d startPose = new Pose2d(-33.6, 60, 180);
+            drive.setPoseEstimate(startPose);
 
-    @Override
-    public void runOpMode() throws InterruptedException {
-        LF = hardwareMap.get(DcMotorEx.class, "left_front");
-        RF = hardwareMap.get(DcMotorEx.class, "right_front");
-        RB = hardwareMap.get(DcMotorEx.class, "right_back");
-        LB = hardwareMap.get(DcMotorEx.class, "left_back");
+            Trajectory traj1 = drive.trajectoryBuilder(startPose, false)
+                    .lineToLinearHeading(new Pose2d(-13.2,57.8, Math.toRadians(0)))
+                    .lineToLinearHeading(new Pose2d(-13.2,13.6, Math.toRadians(-135)))
+                    .build();
 
-        waitForStart();
+            // put cone down code goes here
 
-        if (opModeIsActive()) {
-            LF.setPower(0.25);
-            RB.setPower(0.25);
-            LB.setPower(-0.25);
-            RF.setPower(-0.25);
+            // now go and pick up another code
+            Trajectory traj2 = drive.trajectoryBuilder(traj1.end(), false)
+                    .lineToLinearHeading(new Pose2d(-56.8,14, Math.toRadians(-180)))
+                    .addDisplacementMarker(() -> {
+                        // code to pick up new cone
+                    })
+                    .lineToLinearHeading(new Pose2d(-31.2,11.6, Math.toRadians(-63)))
+                    .build();
 
-            Thread.sleep(1000);
+            // put code here that puts new cone down
 
-            LF.setPower(0);
-            RB.setPower(0);
-            LB.setPower(0);
-            RF.setPower(0);
+            Trajectory traj3 = drive.trajectoryBuilder(traj2.end(), false)
+                    .splineToSplineHeading(new Pose2d(-36.4,38, Math.toRadians(84)), Math.toRadians(84))
+                    .build();
 
+            waitForStart();
+
+            if(isStopRequested()) return;
+
+            drive.followTrajectory(traj1);
+            // put old cone down
+            drive.followTrajectory(traj2);
+            // put new cone down
+            drive.followTrajectory(traj3);
         }
-    }
+
 }
