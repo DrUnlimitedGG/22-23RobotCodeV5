@@ -11,7 +11,7 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 @TeleOp(name="MecanumDrive", group="TeleOp")
-public class MecanumDrive extends OpMode
+public class  MecanumDrive extends OpMode
 {
     // Drivetrain motors
     private DcMotorEx LF = null;
@@ -60,6 +60,10 @@ public class MecanumDrive extends OpMode
 
         belt.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         belt2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        belt.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        belt2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+
 
 
     }
@@ -111,10 +115,7 @@ public class MecanumDrive extends OpMode
         RB.setPower(backRightPower * powerOffset);
 
         if (gamepad2.dpad_right && !gamepad2.dpad_left) {
-            targetPosition = targetPosition - 5;
-
-            belt.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            belt2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            targetPosition = targetPosition - 2;
 
             belt.setTargetPosition(targetPosition);
             belt2.setTargetPosition(targetPosition);
@@ -122,17 +123,17 @@ public class MecanumDrive extends OpMode
             belt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             belt2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
-            belt.setVelocity(armUpSpeed);
-            belt2.setVelocity(armUpSpeed);
+            belt.setPower(armUpSpeed);
+            belt2.setPower(armUpSpeed);
 
-            telemetry.addData("Belt moving up: ", belt.getCurrentPosition());
-        }      // Turn belt forward when A is pressed
+            telemetry.addData("yo we moving UP ", belt.getCurrentPosition());
+            telemetry.addData("speed ", belt.getVelocity());
 
-        else if (gamepad2.dpad_left && !gamepad2.dpad_right) {
-            targetPosition = targetPosition + 5;
 
-            belt.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            belt2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        }
+
+        if (gamepad2.dpad_left && !gamepad2.dpad_right) {
+            targetPosition = targetPosition + 2;
 
             belt.setTargetPosition(targetPosition);
             belt2.setTargetPosition(targetPosition);
@@ -140,10 +141,11 @@ public class MecanumDrive extends OpMode
             belt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             belt2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
-            belt.setVelocity(armDownSpeed);
-            belt2.setVelocity(armDownSpeed);
+            belt.setPower(armDownSpeed);
+            belt2.setPower(armDownSpeed);
 
-            telemetry.addData("Belt moving down: ", belt.getCurrentPosition());
+            telemetry.addData("yo we moving DOWN ", belt.getCurrentPosition());
+            telemetry.addData("speed ", belt.getVelocity());
         }
 
 
@@ -156,16 +158,7 @@ public class MecanumDrive extends OpMode
            claw.setPosition(0.5);
         }
 
-        //clawOffset = Range.clip(clawOffset, -0.5, 0.5);
-        //wrist.setPosition(0.5 + clawOffset);
-        //claw.setPosition(0.5 - clawOffset);
-
-
-        /*telemetry.addData("Claw offset: ",  "Offset = %.2f", clawOffset);
-        telemetry.addData("Claw pos: ", claw.getPosition());
-        telemetry.addData("Claw port: ", claw.getPortNumber());*/
-
-        telemetry.addData("Target: ", targetPosition);
+        telemetry.addData("Target: ", belt.getTargetPosition());
         telemetry.update();
     }
 
@@ -176,5 +169,51 @@ public class MecanumDrive extends OpMode
     public void stop() {
 
     }
+
+    /* public void extendArm(int targetPosition) {
+        belt.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        belt2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+        belt.setTargetPosition(targetPosition);
+        belt2.setTargetPosition(targetPosition);
+
+        belt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        belt2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        belt.setVelocity(armUpSpeed);
+        belt2.setVelocity(armUpSpeed);
+
+        if (!belt.isBusy() && !belt2.isBusy()) {
+            belt.setPower(0);
+            belt2.setPower(0);
+
+        }
+
+        telemetry.addData("Belt moving up: ", belt.getCurrentPosition());
+
+    }
+
+    public void retractArm(int targetPosition) {
+        belt.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        belt2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+        belt.setTargetPosition(targetPosition);
+        belt2.setTargetPosition(targetPosition);
+
+        belt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        belt2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        belt.setVelocity(armDownSpeed);
+        belt2.setVelocity(armDownSpeed);
+
+        if ((targetPosition - belt.getCurrentPosition()) <= 50 && (targetPosition - belt2.getCurrentPosition()) <= 50) {
+            belt.setVelocity(0);
+            belt2.setVelocity(0);
+
+        }
+
+        telemetry.addData("Belt moving down: ", belt.getCurrentPosition());
+
+    } */
 
 }
