@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.acmerobotics.dashboard.config.Config;
 
@@ -14,7 +15,7 @@ import com.acmerobotics.dashboard.config.Config;
 public class testing extends OpMode
 {
     private DcMotorEx belt = null; // Belt motor
-    //private DcMotorEx belt2 = null;
+    private DcMotorEx belt2 = null;
 
 
     /*
@@ -23,13 +24,14 @@ public class testing extends OpMode
     @Override
     public void init() {
         belt = hardwareMap.get(DcMotorEx.class, "belt");
-        //belt2 = hardwareMap.get(DcMotorEx.class, "belt2");
+        belt2 = hardwareMap.get(DcMotorEx.class, "belt2");
 
         belt.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        //belt2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        belt2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         belt.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        //belt2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        belt2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
 
 
 
@@ -59,12 +61,14 @@ public class testing extends OpMode
     @Override
     public void loop() {
         if (gamepad2.dpad_right) {
-            belt.setVelocity(1000);
-            //belt2.setPower(0.5);
+            belt.setPower(0.5);
+            belt2.setPower(0.5);
         }
 
         if (gamepad2.dpad_left) {
-            belt.setVelocity(-1000);
+            belt.setPower(-0.5);
+            belt2.setPower(-0.5);
+
         }
 
 
@@ -72,7 +76,10 @@ public class testing extends OpMode
         telemetry.addData("Belt 1 Velocity: ", belt.getVelocity());
         telemetry.addData("Belt 1 Status: ", belt.getConnectionInfo());
 
-        //telemetry.addData("Belt 2 Power: ", belt2.getVelocity());
+        telemetry.addData("Belt 2 Power: ", belt2.getPower());
+        telemetry.addData("Belt 2 Velocity: ", belt2.getVelocity());
+        telemetry.addData("Belt 2 Status: ", belt2.getConnectionInfo());
+
         telemetry.update();
     }
 
