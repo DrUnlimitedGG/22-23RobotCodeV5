@@ -61,8 +61,8 @@ public class  MecanumDrive extends OpMode
         belt.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         belt2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        belt.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        belt2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        belt.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        belt2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
 
 
@@ -126,8 +126,7 @@ public class  MecanumDrive extends OpMode
             belt.setPower(armUpSpeed);
             belt2.setPower(armUpSpeed);
 
-            telemetry.addData("yo we moving UP ", belt.getCurrentPosition());
-            telemetry.addData("speed ", belt.getVelocity());
+
 
 
         }
@@ -145,7 +144,7 @@ public class  MecanumDrive extends OpMode
             belt2.setPower(armDownSpeed);
 
             telemetry.addData("yo we moving DOWN ", belt.getCurrentPosition());
-            telemetry.addData("speed ", belt.getVelocity());
+            telemetry.addData("speed ", belt.getPower());
         }
 
 
@@ -158,7 +157,8 @@ public class  MecanumDrive extends OpMode
            claw.setPosition(0.5);
         }
 
-        telemetry.addData("Target: ", belt.getTargetPosition());
+        telemetry.addData("Belt 1 Power: ", belt.getVelocity());
+       telemetry.addData("Belt 2 Power: ", belt2.getVelocity());
         telemetry.update();
     }
 
