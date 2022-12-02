@@ -29,11 +29,11 @@ public class  MecanumDrive extends OpMode
     private DcMotorEx belt2 = null;
 
     // Motors at the end of the arm
-    private Servo wrist = null;
+    //private Servo wrist = null;
     private Servo claw = null;
 
-    double clawOffset  = 0.0;
-    final double CLAW_SPEED  = 0.2;
+    //double clawOffset  = 0.0;
+    //final double CLAW_SPEED  = 0.2;
     /*
 
      * Code to run ONCE when the driver hits INIT
@@ -48,7 +48,7 @@ public class  MecanumDrive extends OpMode
         belt = hardwareMap.get(DcMotorEx.class, "belt");
         belt2 = hardwareMap.get(DcMotorEx.class, "belt2");
 
-        wrist = hardwareMap.get(Servo.class, "wrist");
+        //wrist = hardwareMap.get(Servo.class, "wrist");
         claw = hardwareMap.get(Servo.class, "claw");
 
         RF.setDirection(DcMotorEx.Direction.FORWARD);

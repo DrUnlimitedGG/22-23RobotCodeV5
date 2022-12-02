@@ -4,15 +4,12 @@ package org.firstinspires.ftc.teamcode.drive;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.acmerobotics.dashboard.config.Config;
 
 @Config
-@TeleOp(name="testing", group="TeleOp")
-public class testing extends OpMode
+@TeleOp(name="ArmTesting", group="Testing")
+public class ArmTesting extends OpMode
 {
     private DcMotorEx belt = null; // Belt motor
     private DcMotorEx belt2 = null;
