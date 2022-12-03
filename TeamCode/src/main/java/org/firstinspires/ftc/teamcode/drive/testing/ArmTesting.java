@@ -29,7 +29,7 @@ public class ArmTesting extends OpMode
         belt.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         belt2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-
+        belt2.setDirection(DcMotorEx.Direction.REVERSE);
 
 
     }
@@ -58,13 +58,13 @@ public class ArmTesting extends OpMode
     @Override
     public void loop() {
         if (gamepad2.dpad_right) {
-            belt.setPower(0.5);
-            belt2.setPower(0.5);
+            belt.setPower(0.1);
+            belt2.setPower(0.1);
         }
 
         if (gamepad2.dpad_left) {
-            belt.setPower(-0.5);
-            belt2.setPower(-0.5);
+            belt.setPower(-0.1);
+            belt2.setPower(-0.1);
 
         }
 

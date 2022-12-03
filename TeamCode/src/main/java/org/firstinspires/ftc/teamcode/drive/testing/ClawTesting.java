@@ -46,7 +46,7 @@ public class ClawTesting extends OpMode
     public void start() {
 
         claw.setPosition(0.15);
-        wrist.setPosition(0);
+        wrist.setPosition(1);
     }
 
     /*
@@ -58,6 +58,7 @@ public class ClawTesting extends OpMode
         if (gamepad2.right_bumper && !gamepad2.left_bumper) {
             //clawOffset += CLAW_SPEED;
             claw.setPosition(0.225);
+
             /*telemetry.addData("Status: ", "Opening");
             telemetry.addData("Position: ", claw.getPosition());*/
 
@@ -67,6 +68,7 @@ public class ClawTesting extends OpMode
         if (gamepad2.left_bumper && !gamepad2.right_bumper) {
             //clawOffset -= CLAW_SPEED;
             claw.setPosition(0.15);
+
             /*telemetry.addData("Status: ", "Closing");
             telemetry.addData("Position: ", claw.getPosition());*/
 

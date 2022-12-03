@@ -1,20 +1,28 @@
-package org.firstinspires.ftc.teamcode.drive.opencv;
+package org.firstinspires.ftc.teamcode.drive.red;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.openftc.easyopencv.*;
-import org.openftc.apriltag.*;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.drive.red.AprilTagDetectionPipeline;
+import org.openftc.apriltag.AprilTagDetection;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvInternalCamera;
 
 import java.util.ArrayList;
 
-@TeleOp
-public class AutonTemplate extends LinearOpMode {
+@Autonomous(group="red")
+public class redLeftCv extends LinearOpMode {
 
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
+
 
     static final double FEET_PER_METER = 3.28084;
 
@@ -38,6 +46,7 @@ public class AutonTemplate extends LinearOpMode {
     public void runOpMode() {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
 
         camera.setPipeline(aprilTagDetectionPipeline);
@@ -45,6 +54,7 @@ public class AutonTemplate extends LinearOpMode {
             @Override
             public void onOpened() {
                 camera.startStreaming(800, 448, OpenCvCameraRotation.UPRIGHT);
+
             }
 
             @Override
@@ -52,6 +62,8 @@ public class AutonTemplate extends LinearOpMode {
 
             }
         });
+
+
 
         telemetry.setMsTransmissionInterval(50);
 
@@ -98,6 +110,7 @@ public class AutonTemplate extends LinearOpMode {
 
             }
 
+
             telemetry.update();
             sleep(20);
         }
@@ -113,6 +126,22 @@ public class AutonTemplate extends LinearOpMode {
         }
 
         //code
+        Pose2d startPose = new Pose2d(-33.6, 60, 180);
+        drive.setPoseEstimate(startPose);
+
+        Trajectory traj1 = drive.trajectoryBuilder(startPose, false)
+                .forward(4)
+                .build();
+
+        Trajectory traj2 = drive.trajectoryBuilder(startPose, false)
+                .strafeLeft(4)
+                .build();
+
+        if (tagOfInterest.id == LEFT) {
+            drive.followTrajectory(traj1);
+        } else if (tagOfInterest.id == MIDDLE) {
+            drive.followTrajectory(traj2);
+        }
 
     }
 
@@ -125,4 +154,5 @@ public class AutonTemplate extends LinearOpMode {
         telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
     }
+
 }

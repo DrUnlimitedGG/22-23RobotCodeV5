@@ -19,6 +19,11 @@ public class  MecanumDrive extends OpMode
     private DcMotorEx RB = null;
     private DcMotorEx LB = null;
 
+    private Servo claw = null;
+    private Servo wrist = null;
+
+    double clawPosition = 0;
+
     public static double armDownSpeed = 0.1;
     public static double armUpSpeed = -0.15;
 
@@ -28,9 +33,6 @@ public class  MecanumDrive extends OpMode
     private DcMotorEx belt = null; // Belt motor
     private DcMotorEx belt2 = null;
 
-    // Motors at the end of the arm
-    //private Servo wrist = null;
-    private Servo claw = null;
 
     //double clawOffset  = 0.0;
     //final double CLAW_SPEED  = 0.2;
@@ -56,7 +58,10 @@ public class  MecanumDrive extends OpMode
         LF.setDirection(DcMotorEx.Direction.REVERSE);
         LB.setDirection(DcMotorEx.Direction.REVERSE);
 
-        belt.setDirection(DcMotorEx.Direction.REVERSE);
+        belt2.setDirection(DcMotorEx.Direction.REVERSE);
+
+        belt.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        belt2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         belt.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         belt2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
@@ -64,7 +69,11 @@ public class  MecanumDrive extends OpMode
         belt.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         belt2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
+        claw = hardwareMap.get(Servo.class, "claw");
+        claw.setDirection(Servo.Direction.REVERSE);
 
+        wrist = hardwareMap.get(Servo.class, "wrist");
+        wrist.setDirection(Servo.Direction.REVERSE);
 
     }
 
@@ -87,8 +96,11 @@ public class  MecanumDrive extends OpMode
         LB.setPower(0);
         LF.setPower(0);
 
-        //claw.setPosition(0.22);
-        //wrist.setPosition(0.5);
+
+        claw.setPosition(0);
+        wrist.setPosition(0.4);
+
+        targetPosition = 0;
     }
 
     /*
@@ -108,14 +120,14 @@ public class  MecanumDrive extends OpMode
         double frontRightPower = (y - x - rx) / denominator;
         double backRightPower = (y + x - rx) / denominator;
 
-        double powerOffset = 0.1;
+        double powerOffset = 0.7;
         LF.setPower(frontLeftPower * powerOffset);
         LB.setPower(backLeftPower * powerOffset);
         RF.setPower(frontRightPower * powerOffset);
         RB.setPower(backRightPower * powerOffset);
 
         if (gamepad2.dpad_right && !gamepad2.dpad_left) {
-            targetPosition = targetPosition - 2;
+            targetPosition = targetPosition + 2;
 
             belt.setTargetPosition(targetPosition);
             belt2.setTargetPosition(targetPosition);
@@ -132,7 +144,7 @@ public class  MecanumDrive extends OpMode
         }
 
         if (gamepad2.dpad_left && !gamepad2.dpad_right) {
-            targetPosition = targetPosition + 2;
+            targetPosition = targetPosition - 2;
 
             belt.setTargetPosition(targetPosition);
             belt2.setTargetPosition(targetPosition);
@@ -148,17 +160,29 @@ public class  MecanumDrive extends OpMode
         }
 
 
-       if (gamepad2.right_bumper && !gamepad2.left_bumper) {
+        if (gamepad2.right_bumper && !gamepad2.left_bumper) {
             //clawOffset += CLAW_SPEED;
-           claw.setPosition(0.22);
+            claw.setPosition(0.4);
+            wrist.setPosition(0.425);
+            /*telemetry.addData("Status: ", "Opening");
+            telemetry.addData("Position: ", claw.getPosition());*/
 
-        } else if (gamepad2.left_bumper && !gamepad2.right_bumper) {
-            //clawOffset -= CLAW_SPEED;
-           claw.setPosition(0.5);
+
         }
 
-        telemetry.addData("Belt 1 Power: ", belt.getVelocity());
-       telemetry.addData("Belt 2 Power: ", belt2.getVelocity());
+        if (gamepad2.left_bumper && !gamepad2.right_bumper) {
+            //clawOffset -= CLAW_SPEED;
+            claw.setPosition(0.15);
+            wrist.setPosition(0.425);
+            /*telemetry.addData("Status: ", "Closing");
+            telemetry.addData("Position: ", claw.getPosition());*/
+
+
+        }
+
+       telemetry.addData("Target Position: ", targetPosition);
+       telemetry.addData("Belt 1 Position: ", belt.getCurrentPosition());
+       telemetry.addData("Belt 2 Position: ", belt2.getCurrentPosition());
         telemetry.update();
     }
 
