@@ -25,7 +25,7 @@ public class  MecanumDrive extends OpMode
     double clawPosition = 0;
 
     public static double armDownSpeed = 0.2;
-    public static double armUpSpeed = -0.5;
+    public static double armUpSpeed = -0.3;
 
     public static int targetPosition = 0;
 
@@ -120,7 +120,7 @@ public class  MecanumDrive extends OpMode
         double frontRightPower = (y - x - rx) / denominator;
         double backRightPower = (y + x - rx) / denominator;
 
-        double powerOffset = 0.65;
+        double powerOffset = 0.6;
         LF.setPower(frontLeftPower * powerOffset);
         LB.setPower(backLeftPower * powerOffset);
         RF.setPower(frontRightPower * powerOffset);
@@ -192,8 +192,8 @@ public class  MecanumDrive extends OpMode
         }
 
         if (gamepad2.dpad_up) {
-            belt.setTargetPosition(570);
-            belt2.setTargetPosition(570);
+            belt.setTargetPosition(590);
+            belt2.setTargetPosition(590);
 
             belt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             belt2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
@@ -201,7 +201,7 @@ public class  MecanumDrive extends OpMode
             belt.setPower(armUpSpeed);
             belt2.setPower(armUpSpeed);
 
-            wrist.setPosition(0.7);
+            wrist.setPosition(0.46);
         }
 
         /*if (gamepad2.y) {

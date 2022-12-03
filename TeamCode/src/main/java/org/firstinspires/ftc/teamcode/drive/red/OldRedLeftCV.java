@@ -101,7 +101,7 @@ public class OldRedLeftCV extends LinearOpMode {
 
         //need to put in hardware map
 
-        while (!isStarted() && !isStopRequested() && opModeInInit()) {
+        while (!isStarted() && !isStopRequested()) {
             ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
 
             if (currentDetections.size() != 0) {
@@ -229,7 +229,7 @@ public class OldRedLeftCV extends LinearOpMode {
 
                     lowerArm(185);
 
-                    sleep(4000);
+                    requestOpModeStop();
 
                 /*grabCone();
 
@@ -247,6 +247,8 @@ public class OldRedLeftCV extends LinearOpMode {
             }
 
                 step++;
+        } else {
+            telemetry.addData("Waiting for: ", "STOP");
         }
     }
 

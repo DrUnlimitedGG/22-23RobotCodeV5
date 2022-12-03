@@ -11,6 +11,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import java.util.ArrayList;
@@ -72,10 +73,13 @@ public class SimpleRedLeftCV extends LinearOpMode
         telemetry.setMsTransmissionInterval(50);
 
 
-        DcMotor motorFrontLeft = hardwareMap.dcMotor.get("motorFrontLeft");
-        DcMotor motorBackLeft = hardwareMap.dcMotor.get("motorBackLeft");
-        DcMotor motorFrontRight = hardwareMap.dcMotor.get("motorFrontRight");
-        DcMotor motorBackRight = hardwareMap.dcMotor.get("motorBackRight");
+        DcMotor motorFrontLeft = hardwareMap.dcMotor.get("left_front");
+        DcMotor motorBackLeft = hardwareMap.dcMotor.get("left_back");
+        DcMotor motorFrontRight = hardwareMap.dcMotor.get("right_front");
+        DcMotor motorBackRight = hardwareMap.dcMotor.get("right_back");
+
+        motorFrontLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        motorBackLeft.setDirection(DcMotorEx.Direction.REVERSE);
 
 
         /*
@@ -157,24 +161,63 @@ public class SimpleRedLeftCV extends LinearOpMode
             telemetry.update();
         }
 
-        motorFrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        //motorFrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        //motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        if(tagOfInterest.id == LEFT) {
+        if(tagOfInterest.id == RIGHT) {
+            motorFrontLeft.setPower(0.25);
+            motorBackLeft.setPower(-0.25);
+            motorFrontRight.setPower(-0.25);
+            motorBackRight.setPower(0.25);
+
+            sleep(2100);
+
             motorFrontLeft.setPower(1);
-            motorBackLeft.setPower(-1);
-            motorFrontRight.setPower(-1);
-            motorBackRight.setPower(1);
-        }else if(tagOfInterest.id == RIGHT) {
-            motorFrontLeft.setPower(-1);
             motorBackLeft.setPower(1);
             motorFrontRight.setPower(1);
-            motorBackRight.setPower(-1);
+            motorBackRight.setPower(1);
+
+            sleep(250);
+
+            motorFrontLeft.setPower(0);
+            motorBackLeft.setPower(0);
+            motorFrontRight.setPower(0);
+            motorBackRight.setPower(0);
+
+        }else if(tagOfInterest.id == LEFT) {
+            motorFrontLeft.setPower(-0.25);
+            motorBackLeft.setPower(0.25);
+            motorFrontRight.setPower(0.25);
+            motorBackRight.setPower(-0.25);
+
+            sleep(2100);
+
+            motorFrontLeft.setPower(1);
+            motorBackLeft.setPower(1);
+            motorFrontRight.setPower(1);
+            motorBackRight.setPower(1);
+
+            sleep(250);
+
+            motorFrontLeft.setPower(0);
+            motorBackLeft.setPower(0);
+            motorFrontRight.setPower(0);
+            motorBackRight.setPower(0);
+
+
         } else {
+
             motorFrontLeft.setPower(1);
             motorBackLeft.setPower(1);
             motorFrontRight.setPower(1);
             motorBackRight.setPower(1);
+
+            sleep(250);
+
+            motorFrontLeft.setPower(0);
+            motorBackLeft.setPower(0);
+            motorFrontRight.setPower(0);
+            motorBackRight.setPower(0);
 
         }
 
