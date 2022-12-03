@@ -1,33 +1,30 @@
 package org.firstinspires.ftc.teamcode.drive.red;
 
+import static java.lang.Thread.sleep;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.drive.red.AprilTagDetectionPipeline;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 
 import java.util.ArrayList;
 
-@Autonomous(group="red")
-public class redLeftCv extends LinearOpMode {
-
-
+@Autonomous(group="Red")
+public class RedLeftCV extends OpMode {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
+
+    SampleMecanumDrive drive = null;
 
     private Servo claw, wrist;
 
@@ -60,12 +57,15 @@ public class redLeftCv extends LinearOpMode {
 
     AprilTagDetection tagOfInterest = null;
 
+    Trajectory leftTraj1, leftTraj2, leftTraj3, leftTraj4, leftTraj5, leftTraj6, leftTraj7, leftTraj8;
+
+
     @Override
-    public void runOpMode() {
+    public void init() {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        drive = new SampleMecanumDrive(hardwareMap);
 
         belt = hardwareMap.get(DcMotorEx.class, "belt");
         belt2 = hardwareMap.get(DcMotorEx.class, "belt2");
@@ -97,41 +97,60 @@ public class redLeftCv extends LinearOpMode {
             }
         });
 
+        Pose2d startPose = new Pose2d(-33.69, -68.17, Math.toRadians(90.00));
+        drive.setPoseEstimate(startPose);
 
+        leftTraj1 = drive.trajectoryBuilder(startPose, false)
+                .lineToConstantHeading(new Vector2d(-13.5, -63))
+                .build();
 
-        telemetry.setMsTransmissionInterval(50);
+        leftTraj2 = drive.trajectoryBuilder(leftTraj1.end(), false)
+                .lineToLinearHeading(new Pose2d(-13.5, -13, Math.toRadians(133.67)))
+                .build();
 
+        leftTraj3 = drive.trajectoryBuilder(leftTraj2.end(), false)
+                .forward(10)
+                .build();
 
-        //need to put in hardware map
+        leftTraj4 = drive.trajectoryBuilder(leftTraj3.end(), false)
+                .strafeLeft(1.125)
+                .build();
 
-        while (!isStarted() && !isStopRequested()) {
-            ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
+        leftTraj5 = drive.trajectoryBuilder(leftTraj4.end(), false)
+                .lineToLinearHeading(new Pose2d(-13.5, -11, Math.toRadians(185)))
+                .build();
 
-            if (currentDetections.size() != 0) {
-                boolean tagFound = false;
+        leftTraj6 = drive.trajectoryBuilder(leftTraj5.end(), false)
+                .lineToLinearHeading(new Pose2d(-13.5, -63, Math.toRadians(90)))
+                .build();
 
-                for (AprilTagDetection tag : currentDetections) {
-                    if (tag.id == LEFT || tag.id == MIDDLE || tag.id == RIGHT) {
-                        tagOfInterest = tag;
-                        tagFound = true;
-                        break;
-                    }
+        leftTraj7 = drive.trajectoryBuilder(leftTraj6.end(), false)
+                .lineToConstantHeading(new Vector2d(-59.5, -63))
+                .build();
+
+        leftTraj7 = drive.trajectoryBuilder(leftTraj7.end(), false)
+                .forward(30)
+                .build();
+    }
+
+    @Override
+    public void init_loop() {
+        ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
+
+        if (currentDetections.size() != 0) {
+            boolean tagFound = false;
+
+            for (AprilTagDetection tag : currentDetections) {
+                if (tag.id == LEFT || tag.id == MIDDLE || tag.id == RIGHT) {
+                    tagOfInterest = tag;
+                    tagFound = true;
+                    break;
                 }
+            }
 
-                if (tagFound) {
-                    telemetry.addLine("Tag of interest is in sight!\n\nLocation data:");
-                    tagToTelemetry(tagOfInterest);
-                } else {
-                    telemetry.addLine("Don't see tag of interest :(");
-
-                    if (tagOfInterest == null) {
-                        telemetry.addLine("(The tag has never been seen)");
-                    } else {
-                        telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
-                        tagToTelemetry(tagOfInterest);
-                    }
-                }
-
+            if (tagFound) {
+                telemetry.addLine("Tag of interest is in sight!\n\nLocation data:");
+                tagToTelemetry(tagOfInterest);
             } else {
                 telemetry.addLine("Don't see tag of interest :(");
 
@@ -141,14 +160,27 @@ public class redLeftCv extends LinearOpMode {
                     telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
                     tagToTelemetry(tagOfInterest);
                 }
-
             }
 
+        } else {
+            telemetry.addLine("Don't see tag of interest :(");
 
-            telemetry.update();
-            sleep(20);
+            if (tagOfInterest == null) {
+                telemetry.addLine("(The tag has never been seen)");
+            } else {
+                telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
+                tagToTelemetry(tagOfInterest);
+            }
+
         }
 
+
+        telemetry.update();
+        try {
+            sleep(20);
+        } catch (InterruptedException e) {
+
+        }
 
         if (tagOfInterest != null) {
             telemetry.addLine("Tag snapshot:\n");
@@ -159,51 +191,25 @@ public class redLeftCv extends LinearOpMode {
             telemetry.update();
         }
 
-        //code
+
+
+    }
+
+    @Override
+    public void start() {
         claw.setPosition(0);
         wrist.setPosition(0.4);
 
         targetPosition = 0;
 
-        Pose2d startPose = new Pose2d(-33.69, -68.17, Math.toRadians(90.00));
-        drive.setPoseEstimate(startPose);
-
-        Trajectory leftTraj1 = drive.trajectoryBuilder(startPose, false)
-                .lineToConstantHeading(new Vector2d(-11, -63))
-                .build();
-
-        Trajectory leftTraj2 = drive.trajectoryBuilder(leftTraj1.end(), false)
-                .lineToLinearHeading(new Pose2d(-10.5, -13, Math.toRadians(133.67)))
-                .build();
-
-        Trajectory leftTraj3 = drive.trajectoryBuilder(leftTraj2.end(), false)
-                .forward(10)
-                .build();
-
-        Trajectory leftTraj4 = drive.trajectoryBuilder(leftTraj3.end(), false)
-                .strafeLeft(1.125)
-                .build();
-
-        Trajectory leftTraj5 = drive.trajectoryBuilder(leftTraj4.end(), false)
-                .lineToLinearHeading(new Pose2d(-13.5, -11, Math.toRadians(185)))
-                .build();
-
-        Trajectory leftTraj6 = drive.trajectoryBuilder(leftTraj5.end(), false)
-                .lineToLinearHeading(new Pose2d(-50, -10.8, Math.toRadians(185)))
-                .build();
-
-        Trajectory leftTraj7 = drive.trajectoryBuilder(leftTraj6.end(), false)
-                .lineToLinearHeading(new Pose2d(-11, -18, Math.toRadians(133.67)))
-                .build();
-
-        Trajectory leftTraj8 = drive.trajectoryBuilder(leftTraj7.end(), false)
-                .lineToLinearHeading(new Pose2d(-19.182, -7.243, Math.toRadians(132.781)))
-                .build();
-
         if (tagOfInterest.id == LEFT) {
             grabCone();
 
-            sleep(500);
+            try {
+                sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             drive.followTrajectory(leftTraj1);
 
@@ -212,41 +218,56 @@ public class redLeftCv extends LinearOpMode {
             drive.followTrajectory(leftTraj2);
             drive.followTrajectory(leftTraj3);
 
-            sleep(100);
+            try {
+                sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             drive.followTrajectory(leftTraj4);
 
-            sleep(1000);
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             releaseCone();
 
-            sleep(1000);
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             drive.followTrajectory(leftTraj5);
 
-            sleep(4000);
+
+            try {
+                sleep(350);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
 
             drive.followTrajectory(leftTraj6);
 
-            lowerArm(185);
-
-            sleep(4000);
-
-            /*grabCone();
-
-            sleep(1000);
-
-            liftArm(570);
-
-            sleep(750);
+            lowerArm(30);
 
             drive.followTrajectory(leftTraj7);
 
-            sleep(400);
 
-            drive.followTrajectory(leftTraj8);*/
         }
+    }
 
+    @Override
+    public void loop() {
+
+    }
+
+    @Override
+    public void stop() {
+        return;
     }
 
     void tagToTelemetry(AprilTagDetection detection) {
@@ -271,7 +292,7 @@ public class redLeftCv extends LinearOpMode {
         belt2.setPower(armUpSpeed);
 
         while (belt.isBusy() && belt2.isBusy()) {
-            idle();
+
         }
 
     }
@@ -289,7 +310,6 @@ public class redLeftCv extends LinearOpMode {
         belt2.setPower(armDownSpeed);
 
         while (belt.isBusy() && belt2.isBusy()) {
-            idle();
         }
     }
 
