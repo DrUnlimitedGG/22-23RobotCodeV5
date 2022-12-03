@@ -1,10 +1,16 @@
 package org.firstinspires.ftc.teamcode.drive.red;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.red.AprilTagDetectionPipeline;
@@ -23,6 +29,18 @@ public class redLeftCv extends LinearOpMode {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
 
+    private Servo claw, wrist;
+
+    double clawPosition = 0;
+
+    public static double armDownSpeed = 0.1;
+    public static double armUpSpeed = -0.15;
+
+    public static int targetPosition = 0;
+
+    // Motors at the beginning of the arm
+    private DcMotorEx belt = null; // Belt motor
+    private DcMotorEx belt2 = null;
 
     static final double FEET_PER_METER = 3.28084;
 
@@ -46,7 +64,23 @@ public class redLeftCv extends LinearOpMode {
     public void runOpMode() {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+
+        belt = hardwareMap.get(DcMotorEx.class, "belt");
+        belt2 = hardwareMap.get(DcMotorEx.class, "belt2");
+
+        belt2.setDirection(DcMotorEx.Direction.REVERSE);
+
+        claw = hardwareMap.get(Servo.class, "claw");
+        claw.setDirection(Servo.Direction.REVERSE);
+
+        wrist = hardwareMap.get(Servo.class, "wrist");
+        wrist.setDirection(Servo.Direction.REVERSE);
+
+        belt.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        belt2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
 
         camera.setPipeline(aprilTagDetectionPipeline);
@@ -126,21 +160,91 @@ public class redLeftCv extends LinearOpMode {
         }
 
         //code
-        Pose2d startPose = new Pose2d(-33.6, 60, 180);
+        claw.setPosition(0);
+        wrist.setPosition(0.4);
+
+        targetPosition = 0;
+
+        Pose2d startPose = new Pose2d(-33.69, -68.17, Math.toRadians(90.00));
         drive.setPoseEstimate(startPose);
 
-        Trajectory traj1 = drive.trajectoryBuilder(startPose, false)
-                .forward(4)
+        Trajectory leftTraj1 = drive.trajectoryBuilder(startPose, false)
+                .lineToConstantHeading(new Vector2d(-11, -63))
                 .build();
 
-        Trajectory traj2 = drive.trajectoryBuilder(startPose, false)
-                .strafeLeft(4)
+        Trajectory leftTraj2 = drive.trajectoryBuilder(leftTraj1.end(), false)
+                .lineToLinearHeading(new Pose2d(-10.5, -13, Math.toRadians(133.67)))
+                .build();
+
+        Trajectory leftTraj3 = drive.trajectoryBuilder(leftTraj2.end(), false)
+                .forward(10)
+                .build();
+
+        Trajectory leftTraj4 = drive.trajectoryBuilder(leftTraj3.end(), false)
+                .strafeLeft(1.125)
+                .build();
+
+        Trajectory leftTraj5 = drive.trajectoryBuilder(leftTraj4.end(), false)
+                .lineToLinearHeading(new Pose2d(-13.5, -11, Math.toRadians(185)))
+                .build();
+
+        Trajectory leftTraj6 = drive.trajectoryBuilder(leftTraj5.end(), false)
+                .lineToLinearHeading(new Pose2d(-50, -10.8, Math.toRadians(185)))
+                .build();
+
+        Trajectory leftTraj7 = drive.trajectoryBuilder(leftTraj6.end(), false)
+                .lineToLinearHeading(new Pose2d(-11, -18, Math.toRadians(133.67)))
+                .build();
+
+        Trajectory leftTraj8 = drive.trajectoryBuilder(leftTraj7.end(), false)
+                .lineToLinearHeading(new Pose2d(-19.182, -7.243, Math.toRadians(132.781)))
                 .build();
 
         if (tagOfInterest.id == LEFT) {
-            drive.followTrajectory(traj1);
-        } else if (tagOfInterest.id == MIDDLE) {
-            drive.followTrajectory(traj2);
+            grabCone();
+
+            sleep(500);
+
+            drive.followTrajectory(leftTraj1);
+
+            liftArm(570);
+
+            drive.followTrajectory(leftTraj2);
+            drive.followTrajectory(leftTraj3);
+
+            sleep(100);
+
+            drive.followTrajectory(leftTraj4);
+
+            sleep(1000);
+
+            releaseCone();
+
+            sleep(1000);
+
+            drive.followTrajectory(leftTraj5);
+
+            sleep(4000);
+
+            drive.followTrajectory(leftTraj6);
+
+            lowerArm(185);
+
+            sleep(4000);
+
+            /*grabCone();
+
+            sleep(1000);
+
+            liftArm(570);
+
+            sleep(750);
+
+            drive.followTrajectory(leftTraj7);
+
+            sleep(400);
+
+            drive.followTrajectory(leftTraj8);*/
         }
 
     }
@@ -153,6 +257,50 @@ public class redLeftCv extends LinearOpMode {
         telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", Math.toDegrees(detection.pose.yaw)));
         telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
+    }
+
+    public void liftArm(int target) {
+
+        belt.setTargetPosition(target);
+        belt2.setTargetPosition(target);
+
+        belt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        belt2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        belt.setPower(armUpSpeed);
+        belt2.setPower(armUpSpeed);
+
+        while (belt.isBusy() && belt2.isBusy()) {
+            idle();
+        }
+
+    }
+
+    public void lowerArm(int target) {
+        targetPosition = 0;
+
+        belt.setTargetPosition(target);
+        belt2.setTargetPosition(target);
+
+        belt.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        belt2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        belt.setPower(armDownSpeed);
+        belt2.setPower(armDownSpeed);
+
+        while (belt.isBusy() && belt2.isBusy()) {
+            idle();
+        }
+    }
+
+    public void grabCone() {
+        wrist.setPosition(0.425);
+        claw.setPosition(0.4);
+    }
+
+    public void releaseCone() {
+        wrist.setPosition(0.425);
+        claw.setPosition(0.15);
     }
 
 }
