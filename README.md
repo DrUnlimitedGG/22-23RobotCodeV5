@@ -1,4 +1,4 @@
-# Shark!
+# Shark! Robotics
 
 Code repository for 21235 Shark! Robotics
 
